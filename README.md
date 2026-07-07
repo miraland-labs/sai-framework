@@ -1,61 +1,80 @@
 # SAI Framework — Sustainable AI Intelligence Framework
 
-**Version:** 0.1 (Draft)  
+**Version:** 0.2 (Draft)  
 **Date:** July 2026  
 **License:** [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
 ## Overview
 
-The **Sustainable AI Intelligence (SAI) Framework** defines a standardized multi-dimensional methodology for evaluating Large Language Models (LLMs) and generative AI systems. It integrates three core dimensions — Token Efficiency, Intelligence/Value Generation, and Energy Sustainability — to provide a comprehensive, reproducible, and comparable assessment approach.
+The **Sustainable AI Intelligence (SAI) Framework** is an open specification for evaluating Large Language Models (LLMs) across three dimensions — Token Efficiency, Intelligence/Value Generation, and Energy Sustainability — and combining them into the **Sustainable Intelligence Index (SII)**.
 
-This framework addresses fragmentation in current LLM evaluation by enabling unified analysis of performance, resource consumption, and environmental impact. It produces a derived **Sustainable Intelligence Index (SII)** that supports model comparison, optimization, procurement decisions, and Web3 tokenization.
+This repository contains the normative and informative documents that define the standard. It is not an application, SDK, or provider integration.
 
-## Bridging AI LLM Tokens and Web3 Tokenomics
+## Core Dimensions
 
-A core goal of the SAI Framework is to create a standardized bridge between AI token consumption and Web3 tokenomics.
+| Dimension | Name | Primary Metric |
+|-----------|------|----------------|
+| **X** | Token Efficiency | Normalized tokens per intelligence unit (`X_norm`) |
+| **Y** | Intelligence / Value | Weighted benchmark score (0–100) |
+| **Z** | Energy Sustainability | Intelligence Points per Joule (IP/J) |
 
-- **AI Tokens** represent units of computation (input/output tokens processed by LLMs).
-- **Web3 Tokens** are programmable economic assets.
+**SII Formula:** `SII = (Y × Z) / X_norm × 100`
 
-By standardizing and normalizing AI token consumption, value generation, and sustainability into the 3D system and SII, SAI enables:
-- Tokenization of AI intelligence units (e.g., SAI Certificates)
-- On-chain markets for sustainable AI value
-- Incentive mechanisms rewarding efficient, high-value, and green models
-- Agentic economies where AI agents route tasks based on SII scores
+Full definitions, formulas, and worked examples are in **[SPEC.md](SPEC.md)**.
 
-## Core Components
+## Specification Documents
 
-### 3D Evaluation Coordinate System
+| Document | Role |
+|----------|------|
+| [SPEC.md](SPEC.md) | Normative core — metrics, SII, governance |
+| [BENCHMARK_GUIDE.md](BENCHMARK_GUIDE.md) | Normative — benchmark execution and Y scoring |
+| [MEASUREMENT_PROTOCOL.md](MEASUREMENT_PROTOCOL.md) | Normative — energy measurement (Z dimension) |
+| [CONFORMANCE.md](CONFORMANCE.md) | Normative — SAI-Basic / SAI-Full requirements |
+| [schemas/evaluation_report.yaml](schemas/evaluation_report.yaml) | Report schema for published evaluations |
 
-- **X: Token Efficiency** — Effective token consumption relative to value delivered.
-- **Y: Intelligence / Value Generation** — Composite benchmark score (0–100).
-- **Z: Energy Sustainability** — Value per Joule (or Tokens/kWh).
+## Informative Examples
 
-**Sustainable Intelligence Index (SII)** combines the three dimensions into a normalized scalar.
+| Document | Role |
+|----------|------|
+| [examples/worked_example.md](examples/worked_example.md) | End-to-end evaluation walkthrough |
+| [examples/sii_calculator.py](examples/sii_calculator.py) | Reference implementation (Python stdlib only) |
 
-Full definitions, measurement protocols, and calculation methods are in **[SPEC.md](SPEC.md)**.
+Validate the reference calculator:
 
-## Features
+```bash
+python3 examples/sii_calculator.py
+```
 
-- Standardized metrics and evaluation workflow
-- Workload-specific category weighting
-- Dynamic versioning of scores
-- Extensibility for custom benchmarks
-- Web3 integration guidance
+Implementations that run benchmarks, call inference APIs, or measure hardware power belong in separate projects that conform to this specification.
 
-## Usage
+## Workload Categories
 
-See `examples/` directory for calculations and visualizations. Detailed conformance rules are in SPEC.md.
+- **General / Reasoning** — business analysis, writing, QA (default)
+- **Coding** — software development, debugging
+- **Scientific / Mathematical** — research, calculations
+- **Agentic / Tool-Use** — autonomous agents, automation
+
+## Conformance Levels
+
+- **SAI-Basic v0.2** — ≥70% benchmark coverage, Tier 2+ energy measurement
+- **SAI-Full v0.2** — 100% coverage, Tier 1 hardware energy, cross-category evaluation
+- **SAI-Certified** — planned for v1.0 (independent verification)
+
+See [CONFORMANCE.md](CONFORMANCE.md) for self-assessment checklists.
+
+## Web3 Tokenomics (Informative)
+
+SAI defines a bridge between AI token consumption and verifiable intelligence units. Detailed Web3 integration specifications are planned for v0.3.
 
 ## Governance and Contributions
 
-This is an open specification. Contributions are welcome via Issues and Pull Requests. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions to the specification are welcome via Issues and Pull Requests. See [CONTRIBUTING.md](CONTRIBUTING.md) and [ROADMAP.md](ROADMAP.md).
 
 ## Related Work
 
 - TokenPowerBench
-- Hugging Face AI Energy Score & Open LLM Leaderboard
-- ML.Energy initiatives
+- Hugging Face Open LLM Leaderboard
+- ML.Energy Leaderboard
 - MLPerf, TPCx-AI
 
 ## License

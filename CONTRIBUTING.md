@@ -1,55 +1,57 @@
 # Contributing to the SAI Framework
 
-Thank you for your interest in contributing to the **Sustainable AI Intelligence (SAI) Framework**! This is an open, community-driven specification. All contributions are welcome.
+Thank you for your interest in contributing to the **Sustainable AI Intelligence (SAI) Framework**. This is an open, community-driven specification repository.
 
 ## Ways to Contribute
 
-- Reporting issues or bugs
-- Suggesting improvements to the specification
-- Adding new examples or reference implementations
-- Proposing new benchmarks or pillar weightings
-- Improving documentation and examples
-- Web3/tokenization integration ideas
-- Spreading the word about the project
+- Reporting ambiguities or inconsistencies in the specification
+- Proposing clarifications, errata, or normative fixes
+- Suggesting benchmark or metric changes (with justification)
+- Improving informative examples and the reference calculator
+- Proposing conformance criteria refinements
+- Web3/tokenization specification ideas (for future versions)
+
+## What Belongs in This Repository
+
+- Specification and protocol documents (`SPEC.md`, guides, conformance rules)
+- Schemas for evaluation reports
+- Informative worked examples and reference implementations with no external dependencies
+
+## What Belongs Elsewhere
+
+- Inference API integrations, SDKs, and provider-specific tooling
+- Benchmark harnesses, notebooks, and evaluation pipelines
+- Hardware measurement scripts and deployment automation
+- Leaderboards, dashboards, and certification tooling
+
+Conformant implementations are encouraged in separate repositories; link them from Issues or Discussions.
 
 ## Development Process
 
 1. **Discuss First**  
-   Open an Issue to discuss significant changes (new dimensions, major metric changes, governance, etc.) before submitting a PR.
+   Open an Issue to discuss significant changes (new dimensions, formula changes, benchmark modifications) before submitting a PR.
 
 2. **Fork and Branch**  
    - Fork the repository
-   - Create a feature branch (`git checkout -b feature/your-idea`)
+   - Create a feature branch (`git checkout -b spec/your-proposal`)
 
 3. **Make Changes**  
    - Keep changes focused and well-documented
-   - Update `SPEC.md` when modifying the core specification
-   - Add or update examples in the `examples/` directory
+   - Update `SPEC.md` for normative changes; update companion guides when affected
+   - Mark informative vs normative content clearly
 
 4. **Submit a Pull Request**  
-   - Clearly describe the changes
-   - Reference any related Issues
-   - Ensure the specification remains clear and implementable
-
-## Code of Conduct
-
-We expect all contributors to:
-- Be respectful and constructive
-- Focus on technical merit
-- Give credit where due
-- Help maintain an inclusive environment
+   - Describe the change and its rationale
+   - Reference related Issues
+   - Note whether the change is backward-compatible with v0.2
 
 ## Pull Request Guidelines
 
-- Keep PRs focused on a single improvement
-- Update documentation where necessary
-- Add tests or validation examples when adding new features
-- Ensure the specification remains version-compatible
-
-## Recognition
-
-All contributors will be acknowledged in the repository (e.g., in `CONTRIBUTORS.md` or release notes).
+- One logical specification change per PR
+- Update all cross-referenced documents
+- Prefer precise definitions over implementation detail
+- Reference implementations should remain stdlib-only unless the community explicitly decides otherwise
 
 ## Questions?
 
-Open an Issue or start a discussion. We appreciate your help in making the SAI Framework a robust and widely adopted standard for sustainable AI evaluation.
+Open an Issue or start a discussion. We appreciate your help in making SAI a clear, implementable standard for sustainable AI evaluation.

@@ -1,23 +1,24 @@
-# SAI Framework Evaluation Report Schema (v0.2)
+# SAI Framework Evaluation Report Schema (v0.2.1)
 # Copy this template and fill in values for publication.
 # See SPEC.md, BENCHMARK_GUIDE.md, and MEASUREMENT_PROTOCOL.md for field definitions.
 
-schema_version: "0.2"
+schema_version: "0.2.1"
 
 metadata:
   report_id: ""                    # UUID or unique identifier
   evaluator: ""                    # Organization or individual name
   evaluation_date: ""              # ISO 8601 date, e.g. 2026-07-07
-  spec_version: "0.2"
+  spec_version: "0.2.1"
   conformance_level: ""            # sai-basic | sai-full
-  workload_category: ""              # general | coding | scientific | agentic
+  workload_category: ""            # general | coding | scientific | agentic
+  additional_workloads: []         # Required for sai-full: other categories evaluated
 
 model:
   id: ""                           # e.g. meta-llama/Llama-3.1-8B-Instruct
   revision: ""                     # Git commit or HF revision hash
   parameters: ""                   # e.g. 8B
   format: ""                       # FP16, AWQ 4-bit, etc.
-  provider: ""                     # self-hosted | nvidia-api | openai | etc.
+  provider: ""                     # self-hosted | api-provider | etc.
 
 environment:
   hardware:
@@ -28,6 +29,7 @@ environment:
     location: ""                   # Region or facility
   software:
     inference_framework: ""
+    model_format: ""
     cuda_version: ""
     driver_version: ""
     os: ""
@@ -51,12 +53,12 @@ benchmark_config:
   judge_temperature: 0.0
   judge_seed: 42
   livecodebench_version: ""        # e.g. LiveCodeBench-2026-07
+  tokenizer_policy: ""             # normalized | same-tokenizer-raw
 
 benchmarks:
-  # Raw scores (native scale); omit unavailable benchmarks
   mmlu_pro:
     version: "12k-2024"
-    raw_score: null                # percent accuracy
+    raw_score: null
     normalized_score: null
     weight: null
     tokens_input: null
@@ -112,41 +114,44 @@ benchmarks:
     tokens_output: null
   mt_bench:
     version: "v1.0"
-    raw_score: null                # 0-10 judge score
+    raw_score: null
     normalized_score: null
     weight: null
     tokens_input: null
     tokens_output: null
 
 coverage:
-  weight_available: null             # 0.0-1.0 fraction of category weight
-  benchmarks_missing: []           # list of omitted benchmark keys
+  weight_available: null
+  benchmarks_missing: []
 
 tokens:
   total_input: null
   total_output: null
-  total_reasoning: null              # CoT tokens if reported separately
+  total_reasoning: null
   total: null
   baseline_model: gpt-3.5-turbo-0125
+  baseline_y: 55.0
   baseline_total: null
 
 energy_measurement:
-  tier: null                         # 1 | 2 | 3
-  tool: ""                           # nvidia-smi | pynvml | TokenPowerBench | literature
+  tier: null
+  scope: suite                     # suite | probe-scaled
+  scaling_method: ""
+  tool: ""
   sampling_rate_hz: null
   num_runs: null
   baseline_power_w: null
   total_energy_joules: null
   pue: 1.3
-  pue_source: ""                     # measured | default-cloud | default-onprem
+  pue_source: ""
   total_energy_with_pue: null
-  confidence: ""                     # e.g. ±2%
-  phase_breakdown:                   # Required for SAI-Full Tier 1
+  confidence: ""
+  phase_breakdown:
     prefill_energy_j: null
     decode_energy_j: null
-  energy_source: ""                  # Required for Tier 2/3 citation
+  energy_source: ""
 
-carbon_footprint:                    # Optional
+carbon_footprint:
   energy_kwh: null
   grid_intensity_gco2_per_kwh: null
   grid_intensity_source: ""
@@ -154,33 +159,35 @@ carbon_footprint:                    # Optional
 
 results:
   y_score: null
-  y_confidence_interval: ""          # e.g. 50.87 ± 1.2 (95% CI)
+  y_confidence_interval: ""
   x_norm: null
   x_confidence_interval: ""
-  z_score: null                      # IP/J
+  z_score: null
   z_confidence_interval: ""
   sii: null
   sii_confidence_interval: ""
-  sii_interpretation: ""             # exceptional | excellent | good | moderate | poor
+  sii_interpretation: ""
 
 reproducibility:
   methodology_url: ""
   code_repository: ""
-  prompt_verification:               # one of: full_prompts | cryptographic_hashes
+  prompt_verification:
     method: ""
     merkle_root: ""
-    prompt_hashes: []                # SHA-256 per prompt or dataset
+    prompt_hashes: []
   third_party_verification_available: false
 
 conformance_checklist:
   benchmark_coverage_met: false
   energy_tier_met: false
+  energy_scope_suite_or_scaled: false
   environment_disclosed: false
   inference_config_documented: false
   results_within_60_days: false
   statistical_reporting: false
-  phase_aware_energy: false          # SAI-Full only
-  cross_category_evaluation: false   # SAI-Full only
-  reproducibility_package: false     # SAI-Full only
+  rounding_per_spec: false
+  phase_aware_energy: false
+  cross_category_evaluation: false
+  reproducibility_package: false
 
 notes: ""

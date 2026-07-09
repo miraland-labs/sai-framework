@@ -1,10 +1,19 @@
 # SAI Framework Specification
 
 **Sustainable AI Intelligence (SAI) Framework**  
-**Version:** 0.2 (Draft)  
+**Version:** 0.2.1 (Draft)  
 **Date:** July 2026  
 **Status:** Proposed Open Standard  
 **License:** [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+
+### Document Conventions
+
+- **MUST / REQUIRED:** Normative requirements for conformant evaluations
+- **SHOULD / RECOMMENDED:** Strong guidance; deviations MUST be documented
+- **MAY / OPTIONAL:** Permitted alternatives
+- **Informative:** Examples, ranges, and Web3 vision are non-normative unless marked otherwise
+
+Companion documents ([BENCHMARK_GUIDE.md](BENCHMARK_GUIDE.md), [MEASUREMENT_PROTOCOL.md](MEASUREMENT_PROTOCOL.md), [CONFORMANCE.md](CONFORMANCE.md)) are **normative** for their respective domains unless a section is labeled informative.
 
 ## 1. Abstract
 
@@ -32,56 +41,62 @@ Current LLM evaluations are fragmented across disparate benchmarks, with inconsi
 #### 3.1.1 Calculation
 
 ```
-X_raw = Total_Tokens / Task_Success_Score
+X_raw = Total_Tokens / (Y / 100)
 
-Where:
-- Total_Tokens = Input_Tokens + Output_Tokens + Reasoning_Tokens (if applicable)
-- Task_Success_Score = Normalized benchmark accuracy (0-1 scale)
+X_baseline = Baseline_Tokens / (Baseline_Y / 100)
 
 X_norm = X_raw / X_baseline
-
-Where:
-- X_baseline = Token efficiency of reference model (GPT-3.5-turbo as of January 2024)
 ```
 
+Where:
+- `Total_Tokens` = Input_Tokens + Output_Tokens + Reasoning_Tokens (if reported separately), summed over the **same evaluation suite** used for Y
+- `Y` = Intelligence score from §3.2 (0–100)
+- `Baseline_Tokens` = Token total for the baseline model on the same suite (§3.1.4)
+- `Baseline_Y` = Baseline model Y on the same suite and workload category
+
+**Units:** `X_raw` and `X_baseline` are tokens per intelligence unit (dimensionless Y fraction). `X_norm` is a dimensionless ratio.
+
 **Interpretation:**
-- X_norm < 1.0: More efficient than baseline (better)
+- X_norm < 1.0: More token-efficient than baseline (better)
 - X_norm = 1.0: Same efficiency as baseline
 - X_norm > 1.0: Less efficient than baseline (worse)
 
-#### 3.1.2 Tokenizer Normalization
+#### 3.1.2 Tokenizer Policy
 
-Different models use different tokenizers, affecting token counts. For standardization:
+Token counts MUST come from the inference provider or tokenizer used for the evaluation run (API usage metadata or local tokenizer).
+
+**Cross-model comparisons (REQUIRED for published leaderboards):** Apply tokenizer normalization:
 
 ```
 Normalized_Tokens = Actual_Tokens × (Baseline_Tokens_Per_Word / Model_Tokens_Per_Word)
 
 Where:
-- Tokens_Per_Word = Total tokens / Total words for standard corpus
-- Standard corpus: First 10,000 words of English Wikipedia
-- Baseline: GPT-3.5-turbo tokenizer (cl100k_base)
+- Tokens_Per_Word = Total tokens / Total words for the standard corpus
+- Standard corpus: First 10,000 words of English Wikipedia (fixed dump; publish dump ID)
+- Baseline tokenizer: GPT-3.5-turbo (cl100k_base)
 ```
 
-**Alternative (Simpler):** Accept token counts as-is if all comparisons use the same tokenizer or API-reported counts.
+**Same-tokenizer comparisons (MAY):** If all models in a comparison use identical API-reported token accounting, raw counts MAY be used without normalization. The report MUST state which policy was used.
 
 #### 3.1.3 Edge Cases
 
-- **Failed Tasks:** If Task_Success_Score = 0, exclude from X calculation or assign X = infinity (worst case)
-- **Chain-of-Thought Tokens:** Include all reasoning tokens in Total_Tokens
-- **Tool Use:** Include tool invocation tokens but not tool execution output
-- **Multi-turn Conversations:** Sum all tokens across turns for the complete task
+- **Failed suite (Y = 0):** X_norm is undefined. Do not publish SII; report Y = 0 and omit X/SII, or mark evaluation as failed.
+- **Chain-of-Thought / reasoning tokens:** MUST be included in Total_Tokens when the runtime reports them separately.
+- **Tool use:** Include tool-invocation tokens in the prompt/completion stream; exclude tool execution payloads returned by external tools.
+- **Multi-turn:** Sum all tokens across turns for the complete task or conversation under evaluation.
 
 #### 3.1.4 Baseline Reference
 
-**GPT-3.5-turbo (gpt-3.5-turbo-0125, January 2024 snapshot)**
+**Baseline model:** `gpt-3.5-turbo-0125` (January 2024 snapshot)
 
-Reference token efficiency values:
-- MMLU-Pro: ~1,200 tokens per problem (avg)
-- HumanEval+: ~800 tokens per problem (avg)
-- MATH-500: ~1,500 tokens per problem (avg)
+**Provisional Baseline_Y (General workload):** 55.0 until the supplementary baseline dataset is published.
 
-*Note: Exact baseline values will be published in a supplementary baseline dataset.*
+Illustrative per-benchmark token averages (informative; not for conformance):
+- MMLU-Pro: ~1,200 tokens per problem
+- HumanEval+: ~800 tokens per problem
+- MATH-500: ~1,500 tokens per problem
 
+Evaluators MUST cite the baseline token total and Baseline_Y used. When the official baseline dataset ships, those values supersede provisional constants.
 ### 3.2 Y: Intelligence / Value Generation
 
 **Definition:** Composite measure of model capability and usefulness across standardized benchmarks.
@@ -125,18 +140,18 @@ Where:
 
 #### 3.2.3 Aggregation Formula
 
-**Complete Coverage (all benchmarks available):**
+Weights are fractions that sum to 1.0 within a workload category (e.g., MMLU-Pro = 0.20). Normalized scores are on a 0–100 scale.
+
+**Complete or partial coverage:**
 ```
-Y = Σ(weight_i × normalized_score_i)
+Y = Σ(weight_i × normalized_score_i) / Σ(weight_i for available benchmarks)
 ```
 
-**Partial Coverage (missing benchmarks):**
-```
-Y = Σ(weight_i × normalized_score_i) / Σ(weight_i for available benchmarks) × 100
-```
+When all benchmarks are present, `Σ(weight_i) = 1.0` and the formula reduces to a simple weighted sum.
 
-**Requirement:** Must have ≥70% total weight represented.
+**Coverage requirement:** Available weight MUST be ≥ 0.70 (70%) of the chosen workload category for SAI-Basic. SAI-Full requires 1.0 (100%) in the primary category.
 
+**Reporting:** Omit unavailable benchmarks from the sum; publish the coverage fraction and the list of missing benchmarks.
 #### 3.2.4 Workload-Specific Categories
 
 Different use cases prioritize different capabilities. SAI defines four workload categories with adjusted weights:
@@ -167,90 +182,85 @@ Different use cases prioritize different capabilities. SAI defines four workload
 #### 3.3.1 Calculation
 
 ```
-Z = Y_score / Total_Energy_with_PUE
+Z = Y / Total_Energy_with_PUE
 
 Where:
-- Y_score = Intelligence score (0-100)
+- Y = Intelligence score (0–100) from §3.2
 - Total_Energy_with_PUE = Total_Energy_Joules × PUE
-- PUE = Power Usage Effectiveness (data center efficiency multiplier)
+- PUE = Power Usage Effectiveness (data center overhead multiplier)
 ```
 
-**Higher Z values indicate better energy efficiency.**
+**Unit:** Intelligence Points per Joule (IP/J). Higher Z is better.
 
-#### 3.3.2 Energy Measurement Protocol
+#### 3.3.2 Energy Scope (REQUIRED)
 
-SAI defines a **three-tier measurement system** to balance rigor with accessibility:
+`Total_Energy_Joules` MUST be the energy attributable to the **same evaluation suite** that produced Y (all included benchmark problems), not a single probe run alone.
+
+**Tier 1:** Prefer direct measurement over the suite. If suite-length measurement is impractical, measure a standardized probe (§3.3.3), derive energy-per-token (or per-phase rates), and scale to suite token counts / phase timings. Document the scaling method.
+
+**Tier 2:** `Total_Energy_Joules = Suite_Tokens × Energy_per_Token`, with Energy_per_Token from a cited published source matching the model family and hardware class as closely as possible.
+
+#### 3.3.3 Energy Measurement Tiers
 
 **Tier 1: Hardware Measurement (Highest Confidence)**
-- Direct GPU/CPU power measurement using nvidia-smi, NVML, or TokenPowerBench
-- Required for SAI-Full conformance
-- See [MEASUREMENT_PROTOCOL.md](MEASUREMENT_PROTOCOL.md) for details
+- Direct GPU/CPU power measurement (e.g., NVML, nvidia-smi, TokenPowerBench, or equivalent)
+- REQUIRED for SAI-Full
+- See [MEASUREMENT_PROTOCOL.md](MEASUREMENT_PROTOCOL.md)
 
-**Tier 2: API-Based Estimation (Medium Confidence)**
-- Use provider-reported token counts + published energy benchmarks
-- Formula: `Energy (J) = Tokens × Energy_per_Token (J/token)` from reference data
-- Acceptable for SAI-Basic conformance
-- Must cite energy benchmark source
+**Tier 2: Token × Intensity Estimation (Medium Confidence)**
+- Provider-reported suite token counts × published J/token (or equivalent intensity)
+- Acceptable for SAI-Basic
+- MUST cite energy intensity source and date
 
-**Tier 3: Literature-Based Estimation (Informational Only)**
-- Use published energy measurements from academic papers or leaderboards
-- Not sufficient for formal conformance
-- Useful for preliminary comparisons
+**Tier 3: Literature-Based Estimation (Informative Only)**
+- Published totals from papers or model cards without suite-specific token accounting
+- NOT sufficient for SAI-Basic or SAI-Full
 
-#### 3.3.3 Standardized Test Conditions
+#### 3.3.4 Standardized Probe Conditions (Tier 1)
 
-To ensure comparability, hardware measurements should follow these standards:
+When using a probe to derive intensity for suite scaling, use:
 
 ```
-Standard Configuration:
-- Batch size: 1 (single-user simulation)
-- Input context: 2048 tokens (representative document)
-- Output length: 512 tokens (typical response)
-- Number of runs: 100 (for statistical reliability)
-- Temperature: 0.0 (deterministic)
+batch_size: 1
+input_context: 2048 tokens
+output_length: 512 tokens
+num_runs: 100 (excluding ≥10 warmup runs)
+temperature: 0.0
 ```
 
-#### 3.3.4 Phase-Aware Measurement
-
-LLM inference has two distinct phases with different power characteristics:
+#### 3.3.5 Phase-Aware Measurement
 
 ```
 Total_Energy = Prefill_Energy + Decode_Energy
 
 Prefill_Energy = Power_prefill (W) × Time_prefill (s)
-Decode_Energy = Power_decode (W) × Tokens_generated × Time_per_token (s)
+Decode_Energy  = Power_decode (W) × Time_decode (s)
 ```
 
-**Tier 1 measurements must report both phases separately.**
+Where `Time_decode` is the wall-clock duration of the decode phase (equivalently: Tokens_generated × Time_per_token). Do **not** multiply by both tokens and total decode time.
 
-#### 3.3.5 PUE (Power Usage Effectiveness)
-
-PUE accounts for data center overhead (cooling, networking, etc.):
+**SAI-Full Tier 1:** MUST report prefill and decode energy separately.
+#### 3.3.6 PUE (Power Usage Effectiveness)
 
 ```
 Total_Energy_with_PUE = Measured_Energy × PUE
-
-Default PUE values:
-- Cloud providers (AWS, Azure, GCP): 1.3
-- On-premises data centers: 1.5
-- Measured PUE: Use actual facility measurements (preferred)
-- Consumer hardware (local GPU): 1.0 (no data center overhead)
 ```
 
-#### 3.3.6 Carbon Intensity (Optional)
+Default PUE values (use measured facility PUE when available):
+- Cloud providers (AWS, Azure, GCP): 1.3
+- On-premises data centers: 1.5
+- Consumer / local GPU: 1.0
 
-For environmental impact reporting:
+Reports MUST document PUE and its source (`measured` | `default-cloud` | `default-onprem` | `default-local`).
+
+#### 3.3.7 Carbon Intensity (OPTIONAL)
 
 ```
 Carbon_Cost = Total_Energy_kWh × Grid_Intensity (gCO2/kWh)
-
-Recommended sources:
-- ElectricityMap API (real-time regional data)
-- EPA eGRID (US)
-- IEA emissions factors
-- Default: 475 gCO2/kWh (2025 global average)
+Total_Energy_kWh = Total_Energy_with_PUE / 3_600_000
 ```
 
+Recommended sources: ElectricityMap, EPA eGRID, IEA. Default if unspecified: 475 gCO2/kWh (2025 global average, informative).
 ## 4. Sustainable Intelligence Index (SII)
 
 The SII combines all three dimensions into a single composite metric for overall model comparison.
@@ -273,74 +283,77 @@ Scaling factor: ×100 for readability (produces scores typically 10-100)
 - SII accounts for performance, efficiency, and sustainability simultaneously
 - Models with high intelligence but poor efficiency/sustainability score lower
 
-### 4.2 Worked Example
+### 4.2 Worked Example (Informative)
 
-**Model: Llama-3.1-8B-Instruct evaluated on General/Reasoning workload**
+**Model:** Llama-3.1-8B-Instruct · **Workload:** General/Reasoning
 
-#### Step 1: Calculate Y (Intelligence)
+Numbers below use full-precision intermediates; published scores use §4.4 rounding. The reference calculator is authoritative for this example.
+
+#### Step 1: Y (Intelligence)
+
+| Benchmark | Raw | Normalized |
+|-----------|-----|------------|
+| MMLU-Pro | 68% | 57.333… |
+| GPQA Diamond | 42% | 22.666… |
+| MATH-500 | 55% | 55.0 |
+| AIME | 15% | 15.0 |
+| HumanEval+ | 70% | 70.0 |
+| SWE-Bench | 28% | 28.0 |
+| LiveCodeBench | 32% | 32.0 |
+| IFEval | 82% | 82.0 |
+| MT-Bench | 7.8/10 | 78.0 |
+
 ```
-Benchmark results:
-- MMLU-Pro: 68% → Normalized: ((68-25)/(100-25)) × 100 = 57.3
-- GPQA Diamond: 42% → Normalized: ((42-25)/(100-25)) × 100 = 22.7
-- MATH-500: 55% → Normalized: 55.0
-- AIME: 15% → Normalized: 15.0
-- HumanEval+: 70% → Normalized: 70.0
-- SWE-Bench: 28% → Normalized: 28.0
-- LiveCodeBench: 32% → Normalized: 32.0
-- IFEval: 82% → Normalized: 82.0
-- MT-Bench: 7.8/10 → Normalized: 78.0
-
-Y = (20% × 57.3) + (15% × 22.7) + (15% × 55.0) + (5% × 15.0) + 
-    (15% × 70.0) + (10% × 28.0) + (5% × 32.0) + (10% × 82.0) + (5% × 78.0)
-Y = 11.46 + 3.41 + 8.25 + 0.75 + 10.5 + 2.8 + 1.6 + 8.2 + 3.9
-Y = 50.87
-```
-
-#### Step 2: Calculate X_norm (Token Efficiency)
-```
-Total tokens for benchmark suite: 145,000
-GPT-3.5-turbo baseline: 120,000 tokens
-
-X_raw = 145,000 / 0.5087 = 285,051 tokens per intelligence point
-X_baseline = 120,000 / 0.55 = 218,182 tokens per intelligence point
-  (assuming GPT-3.5 scores Y=55 on same benchmarks)
-
-X_norm = 285,051 / 218,182 = 1.31
+Y = 0.20×57.333… + 0.15×22.666… + 0.15×55 + 0.05×15
+  + 0.15×70 + 0.10×28 + 0.05×32 + 0.10×82 + 0.05×78
+Y = 50.8666… → published 50.87
 ```
 
-#### Step 3: Calculate Z (Energy Efficiency)
-```
-Measurement (Tier 1 - Hardware):
-- Total energy for benchmark suite: 12,500 Joules
-- PUE: 1.3 (cloud deployment)
-- Total energy with PUE: 12,500 × 1.3 = 16,250 J
+#### Step 2: X_norm
 
-Z = Y / Total_Energy_with_PUE
-Z = 50.87 / 16,250 = 0.00313 IP/J
 ```
+Suite tokens = 145,000; Baseline tokens = 120,000; Baseline_Y = 55.0
 
-#### Step 4: Calculate SII
-```
-SII = (Y × Z) / X_norm × 100
-SII = (50.87 × 0.00313) / 1.31 × 100
-SII = 0.1592 / 1.31 × 100
-SII = 12.15
+X_raw      = 145000 / (50.8666…/100) = 285,059.21…
+X_baseline = 120000 / (55/100)       = 218,181.81…
+X_norm     = 1.3065 (published)
 ```
 
-**Result: Llama-3.1-8B-Instruct SII = 12.15**
+#### Step 3: Z
 
-### 4.3 SII Interpretation Ranges
+```
+Suite energy = 12,500 J; PUE = 1.3 → 16,250 J
+Z = 50.8666… / 16250 = 0.003130 (published)
+```
 
-Based on preliminary evaluations (subject to refinement):
+#### Step 4: SII
 
-- **SII > 40:** Exceptional sustainable intelligence (frontier models, optimal deployment)
-- **SII 25-40:** Excellent sustainable intelligence (production-ready, efficient)
-- **SII 15-25:** Good sustainable intelligence (capable models, acceptable efficiency)
-- **SII 8-15:** Moderate sustainable intelligence (entry-level models or inefficient deployment)
-- **SII < 8:** Poor sustainable intelligence (consider alternatives)
+```
+SII = (50.8666… × 0.003130) / 1.3065 × 100 = 12.19 (published)
+```
 
-*Note: These ranges are provisional and will be calibrated as more evaluations are completed.*
+**Result: SII = 12.19 (moderate)** — verify with `python3 examples/sii_calculator.py`.
 
+### 4.3 SII Interpretation Ranges (Informative / Provisional)
+
+- **SII > 40:** Exceptional
+- **SII 25–40:** Excellent
+- **SII 15–25:** Good
+- **SII 8–15:** Moderate
+- **SII < 8:** Poor
+
+Bands will be recalibrated as more evaluations accumulate.
+
+### 4.4 Published Score Rounding (REQUIRED)
+
+| Metric | Decimal places |
+|--------|----------------|
+| Y | 2 |
+| X_norm | 4 |
+| Z (IP/J) | 6 |
+| SII | 2 |
+
+Compute with full precision; round only for publication and badges.
 ## 5. Reproducibility Requirements
 
 ### 5.1 Evaluation Environment Disclosure
@@ -412,9 +425,9 @@ Report all measurements with confidence intervals:
 
 ```
 Y: 50.87 ± 1.2 (95% CI)
-Z: 0.00313 ± 0.00008 IP/J (based on 100 runs)
-X_norm: 1.31 ± 0.05
-SII: 12.15 ± 0.4
+Z: 0.003130 ± 0.00008 IP/J (based on 100 runs)
+X_norm: 1.3065 ± 0.05
+SII: 12.19 ± 0.4
 ```
 
 ## 6. Conformance Levels
@@ -518,23 +531,23 @@ Goal: Transition to neutral foundation (Linux Foundation, IEEE, or similar) by v
 
 ## Appendix A: Changelog
 
+### v0.2.1 (July 2026)
+- Fixed partial-coverage Y formula (removed erroneous ×100)
+- Clarified X uses suite Y; tokenizer policy (required vs optional)
+- Defined energy scope: suite-level energy for Z; probe-scaling rules
+- Corrected decode-phase energy formula (power × time, not double-counted)
+- Added published score rounding rules (§4.4)
+- Aligned worked example with reference calculator (SII = 12.19)
+- Added RFC-style MUST/SHOULD/MAY conventions
+
 ### v0.2 (July 2026)
-- ✅ Added precise mathematical definitions for X, Y, Z
-- ✅ Defined three-tier energy measurement system
-- ✅ Specified GPT-3.5-turbo as normalization baseline
-- ✅ Added worked example with Llama-3.1-8B
-- ✅ Defined four workload categories with specific weights
-- ✅ Added SII scaling factor (×100) for readability
-- ✅ Expanded reproducibility requirements
-- ✅ Added conformance level details
-- ✅ Published BENCHMARK_GUIDE.md, CONFORMANCE.md, evaluation report schema
-- ✅ Reference SII calculator and worked example documentation
+- Precise X, Y, Z definitions; three-tier energy system
+- GPT-3.5-turbo baseline; four workload categories
+- SII ×100 scaling; conformance levels; companion guides
+- Reference SII calculator and worked example
 
 ### v0.1 (July 2026)
-- Initial specification release
-- Core 3D framework definition
-- Basic SII formula
-- High-level benchmark guidance
+- Initial conceptual 3D framework and SII formula
 
 ---
 

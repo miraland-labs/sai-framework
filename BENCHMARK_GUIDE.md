@@ -1,7 +1,7 @@
 # Benchmark Execution Guide
 
 **SAI Framework — Intelligence / Value Generation (Y Dimension)**  
-**Version:** 0.2  
+**Version:** 0.2.1  
 **Date:** July 2026
 
 ## Overview
@@ -112,15 +112,15 @@ Y = Σ(weight_i × normalized_score_i)
 
 ### Partial coverage (≥70% weight required)
 
-Renormalize over available benchmarks:
+Same formula as full coverage — renormalize by available weight:
 
 ```
 Y = Σ(weight_i × normalized_score_i) / Σ(weight_i for available benchmarks)
 ```
 
-Weights are fractions (e.g., 0.20 for MMLU-Pro in General workload). Normalized scores are on a 0–100 scale, so Y is also 0–100.
+Weights are fractions (e.g., 0.20 for MMLU-Pro). Normalized scores are 0–100, so Y is 0–100. Do **not** multiply by an extra ×100 after dividing by available weight.
 
-Report which benchmarks were omitted and the resulting coverage percentage.
+Report omitted benchmarks and coverage fraction.
 
 ## Execution Standards
 

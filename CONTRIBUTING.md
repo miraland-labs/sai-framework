@@ -17,6 +17,8 @@ Thank you for your interest in contributing to the **Sustainable AI Intelligence
 - Schemas for evaluation reports
 - Informative worked examples and reference implementations with no external dependencies
 
+When changing formulas, update SPEC, companion guides, the worked example, and `examples/sii_calculator.py` together. Run `python3 examples/sii_calculator.py --self-test` before submitting.
+
 ## What Belongs Elsewhere
 
 - Inference API integrations, SDKs, and provider-specific tooling

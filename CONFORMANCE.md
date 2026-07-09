@@ -1,6 +1,6 @@
 # SAI Conformance Guide
 
-**SAI Framework v0.2**  
+**SAI Framework v0.2.1**  
 **Date:** July 2026
 
 This document defines conformance levels, badge eligibility, and a self-assessment checklist for SAI evaluations. It implements [SPEC.md](SPEC.md) Section 6.
@@ -9,8 +9,8 @@ This document defines conformance levels, badge eligibility, and a self-assessme
 
 | Level | Badge | Energy Tier | Benchmark Coverage | Primary Use Case |
 |-------|-------|-------------|-------------------|------------------|
-| SAI-Basic | SAI-Basic v0.2 | Tier 2+ | ≥70% weight in one category | Public scorecards, API providers |
-| SAI-Full | SAI-Full v0.2 | Tier 1 | 100% in one category + 2 categories total | Research, procurement, leaderboards |
+| SAI-Basic | SAI-Basic v0.2.1 | Tier 2+ | ≥70% weight in one category | Public scorecards, API providers |
+| SAI-Full | SAI-Full v0.2.1 | Tier 1 | 100% in primary category **and** ≥2 categories total | Research, procurement, leaderboards |
 | SAI-Certified | SAI-Certified | Tier 1 + audit | All 4 categories | Future (v1.0+) |
 
 Tier 3 (literature-based energy) is **not** sufficient for any conformance level.
@@ -30,7 +30,7 @@ Tier 3 (literature-based energy) is **not** sufficient for any conformance level
 ### Badge Text
 
 ```
-SAI-Basic v0.2 (General)
+SAI-Basic v0.2.1 (General)
 ```
 
 Replace `(General)` with the evaluated workload category: `Coding`, `Scientific`, or `Agentic`.
@@ -67,7 +67,7 @@ All SAI-Basic requirements, plus:
 ### Badge Text
 
 ```
-SAI-Full v0.2 (General, Coding)
+SAI-Full v0.2.1 (General, Coding)
 ```
 
 List all evaluated categories.
@@ -112,8 +112,10 @@ Coverage = sum of weights for benchmarks with reported scores in the chosen cate
 **Example (General, missing AIME and LiveCodeBench):**
 
 ```
-Available: 20+15+15+15+10+10+5 = 90% (missing 5% AIME + 5% LiveCodeBench)
-Coverage: 90% → qualifies for SAI-Basic (≥70%)
+Present: MMLU-Pro 20% + GPQA 15% + MATH-500 15% + HumanEval+ 15%
+       + SWE-Bench 10% + IFEval 10% + MT-Bench 5% = 90%
+Missing: AIME 5% + LiveCodeBench 5%
+Coverage: 90% → qualifies for SAI-Basic (≥70%); not SAI-Full
 ```
 
 Use [examples/sii_calculator.py](examples/sii_calculator.py) to compute Y with partial coverage; the calculator enforces the 70% minimum.
@@ -155,5 +157,6 @@ Misrepresenting conformance may be challenged via GitHub Issues; the community m
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 0.2.1 | July 2026 | Clarified Full requires two categories; coverage example fixed |
 | 0.2 | July 2026 | Initial conformance guide; three tiers; self-assessment checklists |
 | 0.1 | July 2026 | High-level Basic/Full mentioned in SPEC only |

@@ -1,6 +1,6 @@
 # SAI Framework — Sustainable AI Intelligence Framework
 
-**Version:** 0.2 (Draft)  
+**Version:** 0.2.1 (Draft)  
 **Date:** July 2026  
 **License:** [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
@@ -18,9 +18,9 @@ This repository contains the normative and informative documents that define the
 | **Y** | Intelligence / Value | Weighted benchmark score (0–100) |
 | **Z** | Energy Sustainability | Intelligence Points per Joule (IP/J) |
 
-**SII Formula:** `SII = (Y × Z) / X_norm × 100`
+**SII:** `SII = (Y × Z) / X_norm × 100`
 
-Full definitions, formulas, and worked examples are in **[SPEC.md](SPEC.md)**.
+Full definitions are in **[SPEC.md](SPEC.md)**.
 
 ## Specification Documents
 
@@ -39,13 +39,12 @@ Full definitions, formulas, and worked examples are in **[SPEC.md](SPEC.md)**.
 | [examples/worked_example.md](examples/worked_example.md) | End-to-end evaluation walkthrough |
 | [examples/sii_calculator.py](examples/sii_calculator.py) | Reference implementation (Python stdlib only) |
 
-Validate the reference calculator:
-
 ```bash
 python3 examples/sii_calculator.py
+python3 examples/sii_calculator.py --self-test
 ```
 
-Implementations that run benchmarks, call inference APIs, or measure hardware power belong in separate projects that conform to this specification.
+Benchmark harnesses, inference APIs, and hardware tooling belong in separate projects that conform to this specification.
 
 ## Workload Categories
 
@@ -56,19 +55,19 @@ Implementations that run benchmarks, call inference APIs, or measure hardware po
 
 ## Conformance Levels
 
-- **SAI-Basic v0.2** — ≥70% benchmark coverage, Tier 2+ energy measurement
-- **SAI-Full v0.2** — 100% coverage, Tier 1 hardware energy, cross-category evaluation
+- **SAI-Basic v0.2.1** — ≥70% benchmark coverage, Tier 2+ energy, suite-scoped Z
+- **SAI-Full v0.2.1** — 100% primary coverage, Tier 1 energy, ≥2 workload categories
 - **SAI-Certified** — planned for v1.0 (independent verification)
 
-See [CONFORMANCE.md](CONFORMANCE.md) for self-assessment checklists.
+See [CONFORMANCE.md](CONFORMANCE.md).
 
 ## Web3 Tokenomics (Informative)
 
-SAI defines a bridge between AI token consumption and verifiable intelligence units. Detailed Web3 integration specifications are planned for v0.3.
+SAI defines a bridge between AI token consumption and verifiable intelligence units. Detailed Web3 integration is planned for v0.3.
 
 ## Governance and Contributions
 
-Contributions to the specification are welcome via Issues and Pull Requests. See [CONTRIBUTING.md](CONTRIBUTING.md) and [ROADMAP.md](ROADMAP.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [ROADMAP.md](ROADMAP.md).
 
 ## Related Work
 
@@ -79,4 +78,4 @@ Contributions to the specification are welcome via Issues and Pull Requests. See
 
 ## License
 
-This work is licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+[CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)

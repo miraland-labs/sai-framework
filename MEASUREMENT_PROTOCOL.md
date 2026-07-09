@@ -1,14 +1,26 @@
 # Energy Measurement Protocol
 
-**SAI Framework - Energy Sustainability (Z Dimension)**  
-**Version:** 0.2  
+**SAI Framework — Energy Sustainability (Z Dimension)**  
+**Version:** 0.2.1  
 **Date:** July 2026
 
 ## Overview
 
-This document provides detailed procedures for measuring energy consumption of LLM inference, corresponding to the **Z dimension** (Energy Sustainability) of the SAI Framework.
+This document provides detailed procedures for measuring energy consumption of LLM inference for the **Z dimension** of the SAI Framework.
 
-SAI defines a **three-tier measurement system** to balance scientific rigor with practical accessibility.
+SAI defines a **three-tier measurement system** to balance rigor with accessibility.
+
+## Energy Scope (Normative)
+
+`Total_Energy_Joules` used in `Z = Y / (Total_Energy_Joules × PUE)` MUST correspond to the **same evaluation suite** that produced Y.
+
+| Approach | When to use |
+|----------|-------------|
+| Direct suite measurement | Preferred for Tier 1 when feasible |
+| Probe + scale | Measure standardized probe (§Tier 1 config), derive J/token or phase rates, scale to suite tokens/timings; document method |
+| Token × intensity | Tier 2: `Suite_Tokens × Energy_per_Token` with cited source |
+
+A probe-only energy figure (e.g., one 2048→512 run) MUST NOT be used as `Total_Energy_Joules` without scaling to the suite.
 
 ## Three-Tier Measurement System
 
@@ -224,20 +236,20 @@ print(f"\nTotal Energy: {mean_energy:.2f} ± {std_energy:.2f} J (100 runs)")
 
 For SAI-Full conformance, separate prefill and decode phases:
 
-```python
-# Measure prefill phase
-start = time.time()
-prefill_samples = []
-# ... collect power during prompt processing ...
-prefill_time = time.time() - start
-prefill_energy = avg(prefill_samples) * prefill_time
+```
+Prefill_Energy = Power_prefill (W) × Time_prefill (s)
+Decode_Energy  = Power_decode (W) × Time_decode (s)
+Total_Energy   = Prefill_Energy + Decode_Energy
+```
 
-# Measure decode phase (token generation)
-decode_samples = []
-for token in range(512):
-    # ... collect power during each token generation ...
-    pass
-decode_energy = avg(decode_samples) * decode_time
+`Time_decode` is wall-clock decode duration (or Tokens × time_per_token). Do **not** multiply average power by both token count and total decode time.
+
+```python
+# Prefill: power samples during prompt processing only
+prefill_energy = mean(prefill_power_w) * prefill_duration_s
+
+# Decode: power samples during generation only
+decode_energy = mean(decode_power_w) * decode_duration_s
 
 total_energy = prefill_energy + decode_energy
 print(f"Prefill: {prefill_energy:.2f} J, Decode: {decode_energy:.2f} J")
